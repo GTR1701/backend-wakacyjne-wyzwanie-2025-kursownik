@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-spread */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { CanActivate, ExecutionContext } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -13,12 +11,18 @@ import { ChapterService } from "./chapter.service";
 import type { CreateChapterDto } from "./dto/create-chapter.dto";
 import type { UpdateChapterDto } from "./dto/update-chapter.dto";
 
+interface MockUser {
+  email: string;
+  role: number;
+}
+
 class MockAuthGuard implements CanActivate {
-  constructor(private user) {}
+  constructor(private user: MockUser) {}
   canActivate(context: ExecutionContext): boolean {
-    const request_ = context.switchToHttp().getRequest();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    request_.user = this.user;
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: MockUser }>();
+    request.user = this.user;
     return true;
   }
 }
@@ -27,12 +31,20 @@ describe("ChapterController", () => {
   let controller: ChapterController;
 
   const mockChapterService = {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    create: jest.fn((dto) => ({ id: Date.now().toString(), ...dto })),
+    create: jest.fn((dto: CreateChapterDto) => ({
+      id: Date.now().toString(),
+      name: dto.name,
+      description: dto.description,
+      courseId: dto.courseId,
+    })),
     findAll: jest.fn(),
     findOne: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    update: jest.fn((id, dto) => ({ id, ...dto })),
+    update: jest.fn((id: string, dto: UpdateChapterDto) => ({
+      id,
+      name: dto.name,
+      description: dto.description,
+      courseId: dto.courseId,
+    })),
     remove: jest.fn(),
   };
 
@@ -66,10 +78,8 @@ describe("ChapterController", () => {
     };
 
     const result = await controller.create(dto);
-    expect(result).toEqual({
-      id: expect.any(String),
-      ...dto,
-    });
+    expect(result.id).toEqual(expect.stringMatching(/.*/));
+    expect(result).toMatchObject(dto);
     expect(mockChapterService.create).toHaveBeenCalledWith(dto);
   });
 
@@ -101,12 +111,13 @@ describe("ChapterController", () => {
 
   it("should update a chapter", async () => {
     const id = "1";
-    const dto: UpdateChapterDto = { name: "Updated Chapter" };
+    const dto = { name: "Updated Chapter" };
     const updatedChapter = {
       id,
       name: dto.name,
       description: "Desc 1",
-    };
+      courseId: "1",
+    } as never;
     mockChapterService.update.mockResolvedValue(updatedChapter);
 
     const result = await controller.update(id, dto);

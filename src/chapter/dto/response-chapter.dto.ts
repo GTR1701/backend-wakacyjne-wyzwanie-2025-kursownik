@@ -1,5 +1,5 @@
 import { Lesson } from "@prisma/client";
-import { IsArray, IsString } from "class-validator";
+import { IsArray, IsObject, IsString } from "class-validator";
 
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -19,7 +19,8 @@ export class ResponseChapterDto {
   @IsString()
   courseId: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [Object] })
   @IsArray()
+  @IsObject({ each: true })
   lessons: Lesson[];
 }

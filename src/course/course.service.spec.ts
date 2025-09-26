@@ -1,3 +1,5 @@
+import type { Course } from "@prisma/client";
+
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -48,7 +50,12 @@ describe("CourseService", () => {
       description: "Desc",
       imageSrc: "image.png",
     };
-    const mockCourse = { id: "c-1", ...dto };
+    const mockCourse: Course = {
+      id: "c-1",
+      name: dto.name,
+      description: dto.description,
+      imageSrc: dto.imageSrc,
+    };
 
     mockPrismaService.course.create.mockResolvedValue(mockCourse);
 

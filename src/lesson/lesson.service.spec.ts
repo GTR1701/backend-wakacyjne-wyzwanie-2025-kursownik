@@ -1,3 +1,5 @@
+import type { Lesson } from "@prisma/client";
+
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -49,7 +51,12 @@ describe("LessonService", () => {
       chapterId: "chapter-1",
     };
 
-    const mockLesson = { id: "lesson-1", ...dto };
+    const mockLesson: Lesson = {
+      id: "lesson-1",
+      name: dto.name,
+      description: dto.description,
+      chapterId: dto.chapterId,
+    };
     mockDatabaseService.lesson.create.mockResolvedValue(mockLesson);
 
     const result = await service.create(dto);

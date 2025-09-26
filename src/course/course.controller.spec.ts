@@ -11,11 +11,18 @@ import { CourseService } from "./course.service";
 import type { CreateCourseDto } from "./dto/create-course.dto";
 import type { UpdateCourseDto } from "./dto/update-course.dto";
 
+interface MockUser {
+  email: string;
+  role: number;
+}
+
 class MockAuthGuard implements CanActivate {
-  constructor(private user) {}
+  constructor(private user: MockUser) {}
   canActivate(context: ExecutionContext): boolean {
-    const request_ = context.switchToHttp().getRequest();
-    request_.user = this.user;
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: MockUser }>();
+    request.user = this.user;
     return true;
   }
 }
@@ -24,10 +31,20 @@ describe("CourseController", () => {
   let controller: CourseController;
 
   const mockCourseService = {
-    create: jest.fn((dto) => ({ id: Date.now().toString(), ...dto })),
+    create: jest.fn((dto: CreateCourseDto) => ({
+      id: Date.now().toString(),
+      name: dto.name,
+      description: dto.description,
+      imageSrc: dto.imageSrc,
+    })),
     findAll: jest.fn(),
     findOne: jest.fn(),
-    update: jest.fn((id, dto) => ({ id, ...dto })),
+    update: jest.fn((id: string, dto: UpdateCourseDto) => ({
+      id,
+      name: dto.name,
+      description: dto.description,
+      imageSrc: dto.imageSrc,
+    })),
     remove: jest.fn(),
   };
 
@@ -59,10 +76,8 @@ describe("CourseController", () => {
     };
 
     const result = await controller.create(dto);
-    expect(result).toEqual({
-      id: expect.any(String),
-      ...dto,
-    });
+    expect(result.id).toEqual(expect.stringMatching(/.*/));
+    expect(result).toMatchObject(dto);
     expect(mockCourseService.create).toHaveBeenCalledWith(dto);
   });
 
@@ -110,7 +125,7 @@ describe("CourseController", () => {
       name: dto.name,
       description: "Desc 1",
       imageSrc: "image src",
-    };
+    } as never;
     mockCourseService.update.mockResolvedValue(updatedCourse);
 
     const result = await controller.update(id, dto);

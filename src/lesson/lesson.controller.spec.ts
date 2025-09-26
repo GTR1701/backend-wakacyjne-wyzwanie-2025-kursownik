@@ -11,11 +11,18 @@ import type { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonController } from "./lesson.controller";
 import { LessonService } from "./lesson.service";
 
+interface MockUser {
+  email: string;
+  role: number;
+}
+
 class MockAuthGuard implements CanActivate {
-  constructor(private user) {}
+  constructor(private user: MockUser) {}
   canActivate(context: ExecutionContext): boolean {
-    const request_ = context.switchToHttp().getRequest();
-    request_.user = this.user;
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: MockUser }>();
+    request.user = this.user;
     return true;
   }
 }
@@ -24,10 +31,20 @@ describe("LessonController", () => {
   let controller: LessonController;
 
   const mockLessonService = {
-    create: jest.fn(async (dto) => ({ id: Date.now().toString(), ...dto })),
+    create: jest.fn((dto: CreateLessonDto) => ({
+      id: Date.now().toString(),
+      name: dto.name,
+      description: dto.description,
+      chapterId: dto.chapterId,
+    })),
     findAll: jest.fn(),
     findOne: jest.fn(),
-    update: jest.fn((id, dto) => ({ id, ...dto })),
+    update: jest.fn((id: string, dto: UpdateLessonDto) => ({
+      id,
+      name: dto.name,
+      description: dto.description,
+      chapterId: dto.chapterId,
+    })),
     remove: jest.fn(),
   };
 
@@ -59,10 +76,8 @@ describe("LessonController", () => {
     };
 
     const result = await controller.create(dto);
-    expect(result).toEqual({
-      id: expect.any(String),
-      ...dto,
-    });
+    expect(result.id).toEqual(expect.stringMatching(/.*/));
+    expect(result).toMatchObject(dto);
     expect(mockLessonService.create).toHaveBeenCalledWith(dto);
   });
 
@@ -93,9 +108,9 @@ describe("LessonController", () => {
     const updatedLesson = {
       id,
       name: "Updated Lesson",
-      description: "",
-      chapterId: 1,
-    };
+      description: "test",
+      chapterId: "1",
+    } as never;
     mockLessonService.update.mockResolvedValue(updatedLesson);
 
     const result = await controller.update(id, dto);
