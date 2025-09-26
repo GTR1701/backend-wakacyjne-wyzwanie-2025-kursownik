@@ -4,7 +4,7 @@ import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 
-import { DatabaseService } from "../database/database.service";
+import { PrismaService } from "../prisma/prisma.service";
 import type { CreateLessonDto } from "./dto/create-lesson.dto";
 import type { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonService } from "./lesson.service";
@@ -27,9 +27,9 @@ describe("LessonService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LessonService, DatabaseService],
+      providers: [LessonService, PrismaService],
     })
-      .overrideProvider(DatabaseService)
+      .overrideProvider(PrismaService)
       .useValue(mockDatabaseService)
       .compile();
 

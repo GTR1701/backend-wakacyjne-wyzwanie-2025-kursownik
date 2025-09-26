@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
-import { DatabaseService } from "../database/database.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { CreateChapterDto } from "./dto/create-chapter.dto";
 import { ResponseChapterDto } from "./dto/response-chapter.dto";
 import { UpdateChapterDto } from "./dto/update-chapter.dto";
 
 @Injectable()
 export class ChapterService {
-  constructor(private database: DatabaseService) {}
+  constructor(private database: PrismaService) {}
   async create(createChapterDto: CreateChapterDto) {
     return await this.database.chapter.create({
       data: {
