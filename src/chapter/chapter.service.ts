@@ -3,6 +3,7 @@ import { DatabaseService } from "src/database/database.service";
 import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { CreateChapterDto } from "./dto/create-chapter.dto";
+import { ResponseChapterDto } from "./dto/response-chapter.dto";
 import { UpdateChapterDto } from "./dto/update-chapter.dto";
 
 @Injectable()
@@ -22,16 +23,26 @@ export class ChapterService {
     return await this.database.chapter.findMany();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<ResponseChapterDto> {
     const chapter = await this.database.chapter.findUnique({
       where: { id },
     });
 
-    if (chapter === null) {
+    if (chapter == null) {
       throw new NotFoundException(`Chapter with id ${id} not found`);
-    } else {
-      return chapter;
     }
+
+    const lessons = await this.database.lesson.findMany({
+      where: { chapterId: chapter.id },
+    });
+
+    return {
+      id: chapter.id,
+      name: chapter.name,
+      description: chapter.description,
+      courseId: chapter.courseId,
+      lessons,
+    };
   }
 
   async update(id: string, updateChapterDto: UpdateChapterDto) {
