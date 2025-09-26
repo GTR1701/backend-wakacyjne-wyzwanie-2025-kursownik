@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
-import { DatabaseService } from "../database/database.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
 
 @Injectable()
 export class LessonService {
-  constructor(private database: DatabaseService) {}
+  constructor(private database: PrismaService) {}
   async create(createLessonDto: CreateLessonDto) {
     return await this.database.lesson.create({
       data: {
