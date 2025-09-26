@@ -8,9 +8,20 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from "@nestjs/common";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 
+import { Role } from "@/lib/roles";
+
+import { AuthGuard } from "../auth/auth.guard";
+import { Roles } from "../auth/roles/role.decorator";
+import { RoleGuard } from "../auth/roles/role.guard";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonService } from "./lesson.service";
@@ -35,6 +46,9 @@ export class LessonController {
     status: 404,
     description: `Chapter with given  id  not found`,
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
   async create(@Body() createLessonDto: CreateLessonDto) {
     return await this.lessonService.create(createLessonDto);
   }
@@ -60,6 +74,18 @@ export class LessonController {
   }
 
   @Patch(":id")
+  @ApiOperation({
+    summary: "Update lesson",
+    description: "Update lesson by id",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Lesson Updated",
+    type: [UpdateLessonDto],
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
   async update(
     @Param("id") id: string,
     @Body() updateLessonDto: UpdateLessonDto,
@@ -68,6 +94,17 @@ export class LessonController {
   }
 
   @Delete(":id")
+  @ApiOperation({
+    summary: "Delete lesson",
+    description: "Delete lesson by id",
+  })
+  @ApiResponse({
+    status: 204,
+    description: "Lesson deleted",
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
   async remove(@Param("id") id: string) {
     return await this.lessonService.remove(id);
   }

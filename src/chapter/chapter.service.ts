@@ -1,7 +1,6 @@
-import { DatabaseService } from "src/database/database.service";
-
 import { Injectable, NotFoundException } from "@nestjs/common";
 
+import { DatabaseService } from "../database/database.service";
 import { CreateChapterDto } from "./dto/create-chapter.dto";
 import { ResponseChapterDto } from "./dto/response-chapter.dto";
 import { UpdateChapterDto } from "./dto/update-chapter.dto";
