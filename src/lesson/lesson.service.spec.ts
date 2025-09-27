@@ -1,9 +1,10 @@
-import type { Chapter, Lesson } from "@prisma/client";
+import type { Chapter, Course, Lesson, UserCourses } from "@prisma/client";
 
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 
+import { ChapterService } from "../chapter/chapter.service";
 import { PrismaService } from "../prisma/prisma.service";
 import type { CreateLessonDto } from "./dto/create-lesson.dto";
 import type { UpdateLessonDto } from "./dto/update-lesson.dto";
@@ -20,21 +21,47 @@ describe("LessonService", () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
     },
     chapter: {
       findUnique: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
+    },
+    course: {
+      findUnique: jest.fn(),
+    },
+    userCourses: {
+      findFirst: jest.fn(),
     },
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LessonService, PrismaService],
+      providers: [LessonService, PrismaService, ChapterService],
     })
       .overrideProvider(PrismaService)
       .useValue(mockDatabaseService)
       .compile();
 
     service = module.get<LessonService>(LessonService);
+
+    const mockUserCourses: UserCourses = {
+      id: "id",
+      userId: email,
+      courseId: "course-1",
+      isPremium: true,
+      activeLessonId: "lesson-1",
+    };
+    mockDatabaseService.userCourses.findFirst.mockResolvedValue(
+      mockUserCourses,
+    );
+    const mockCourses: Course = {
+      id: mockUserCourses.courseId,
+      name: "Course 1",
+      description: "Desc",
+      imageSrc: "src",
+    };
+    mockDatabaseService.course.findUnique.mockResolvedValue(mockCourses);
   });
 
   afterEach(() => {

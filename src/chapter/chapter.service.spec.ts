@@ -1,4 +1,4 @@
-import type { Course } from "@prisma/client";
+import type { Course, UserCourses } from "@prisma/client";
 
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
@@ -27,6 +27,9 @@ describe("ChapterService", () => {
     course: {
       findUnique: jest.fn(),
     },
+    userCourses: {
+      findFirst: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -38,6 +41,17 @@ describe("ChapterService", () => {
       .compile();
 
     service = module.get<ChapterService>(ChapterService);
+
+    const mockUserCourses: UserCourses = {
+      id: "id",
+      userId: email,
+      courseId: "course-1",
+      isPremium: true,
+      activeLessonId: "lesson-1",
+    };
+    mockDatabaseService.userCourses.findFirst.mockResolvedValue(
+      mockUserCourses,
+    );
   });
 
   afterEach(() => {

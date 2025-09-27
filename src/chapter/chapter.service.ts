@@ -35,10 +35,14 @@ export class ChapterService {
 
   async findAll(email: string) {
     const chapters = await this.database.chapter.findMany();
-    return chapters.filter(
-      (chapter) =>
-        this.isPremium(email, chapter.courseId) || chapter.chapterOrder <= 2,
+    const accessChecks = await Promise.all(
+      chapters.map(
+        async (chapter) =>
+          (await this.isPremium(email, chapter.courseId)) ||
+          chapter.chapterOrder <= 2,
+      ),
     );
+    return chapters.filter((_chapter, index) => accessChecks[index]);
   }
 
   async findOne(email: string, id: string): Promise<ResponseChapterDto> {
@@ -49,7 +53,10 @@ export class ChapterService {
     if (chapter == null) {
       throw new NotFoundException(`Chapter with id ${id} not found`);
     }
-    if (!this.isPremium(email, chapter.courseId) && chapter.chapterOrder > 2) {
+    if (
+      !(await this.isPremium(email, chapter.courseId)) &&
+      chapter.chapterOrder > 2
+    ) {
       throw new UnauthorizedException(
         "You must be a premium user to access this chapter",
       );
@@ -124,7 +131,11 @@ export class ChapterService {
     });
     return (result._max.chapterOrder ?? 0) + 1;
   }
-  private isPremium(_email: string, _courseId: string): boolean {
-    return true;
+  async isPremium(email: string, courseId: string): Promise<boolean> {
+    const userCourses = await this.database.userCourses.findFirst({
+      where: { userId: email, courseId },
+    });
+
+    return userCourses?.isPremium === true;
   }
 }

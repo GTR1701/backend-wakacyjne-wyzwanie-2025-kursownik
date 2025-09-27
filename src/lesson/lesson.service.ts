@@ -4,13 +4,17 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 
+import { ChapterService } from "../chapter/chapter.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
 
 @Injectable()
 export class LessonService {
-  constructor(private database: PrismaService) {}
+  constructor(
+    private database: PrismaService,
+    private chapterService: ChapterService,
+  ) {}
   async create(createLessonDto: CreateLessonDto) {
     if (
       (await this.database.chapter.findUnique({
@@ -35,10 +39,15 @@ export class LessonService {
   async findAll(email: string) {
     const lessons = await this.database.lesson.findMany();
 
-    return lessons.filter(
-      (lesson) =>
-        this.isPremium(email, lesson.chapterId) || lesson.lessonOrder <= 2,
+    const accessChecks = await Promise.all(
+      lessons.map(
+        async (lesson) =>
+          (await this.isPremium(email, lesson.chapterId)) ||
+          lesson.lessonOrder <= 2,
+      ),
     );
+
+    return lessons.filter((_lesson, index) => accessChecks[index]);
   }
 
   async findOne(email: string, id: string) {
@@ -57,7 +66,10 @@ export class LessonService {
         `Chapter with id ${lesson.chapterId} not found`,
       );
     }
-    if (!this.isPremium(email, lesson.chapterId) && chapter.chapterOrder > 2) {
+    if (
+      !(await this.isPremium(email, lesson.chapterId)) &&
+      chapter.chapterOrder > 2
+    ) {
       throw new UnauthorizedException(
         "You must be a premium user to access this lesson",
       );
@@ -124,7 +136,13 @@ export class LessonService {
     return (result._max.lessonOrder ?? 0) + 1;
   }
 
-  private isPremium(_email: string, _chapterId: string): boolean {
-    return true;
+  private async isPremium(email: string, chapterId: string): Promise<boolean> {
+    const chapter = await this.database.chapter.findUnique({
+      where: { id: chapterId },
+    });
+    if (chapter == null) {
+      throw new NotFoundException(`Chapter with id ${chapterId} not found`);
+    }
+    return this.chapterService.isPremium(email, chapter.courseId);
   }
 }
