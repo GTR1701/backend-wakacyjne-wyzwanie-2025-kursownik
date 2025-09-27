@@ -60,6 +60,8 @@ export class CourseController {
     description: "A list of courses.",
     type: [CreateCourseDto],
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findAll() {
     return this.courseService.findAll();
   }
@@ -79,6 +81,8 @@ export class CourseController {
     status: 404,
     description: "Course not found.",
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findOne(@Param("id") id: string) {
     return this.courseService.findOne(id);
   }

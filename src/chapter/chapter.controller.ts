@@ -60,6 +60,8 @@ export class ChapterController {
     description: "A list of chapters.",
     type: [CreateChapterDto],
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findAll() {
     return this.chapterService.findAll();
   }
@@ -79,6 +81,8 @@ export class ChapterController {
     status: 404,
     description: "Chapter not found.",
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findOne(@Param("id") id: string) {
     return this.chapterService.findOne(id);
   }

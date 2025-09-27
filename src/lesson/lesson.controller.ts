@@ -64,11 +64,27 @@ export class LessonController {
     description: "A list of lessons.",
     type: [CreateLessonDto],
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findAll() {
     return await this.lessonService.findAll();
   }
 
   @Get(":id")
+  @ApiOperation({
+    summary: "Get lesson by id",
+    description: "Retrieve a lesson by its id",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The lesson with the specified id.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Lesson with given id not found",
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async findOne(@Param("id") id: string) {
     return await this.lessonService.findOne(id);
   }

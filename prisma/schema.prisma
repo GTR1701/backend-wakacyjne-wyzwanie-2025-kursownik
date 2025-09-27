@@ -48,6 +48,7 @@ model Chapter {
   name        String
   description String
   courseId    String
+  chapterOrder Int 
 
   course Course @relation(fields: [courseId], references: [id])
 
@@ -59,6 +60,7 @@ model Lesson {
   name        String
   description String
   chapterId   String
+  lessonOrder Int
 
   chapter Chapter @relation(fields: [chapterId], references: [id])
 
