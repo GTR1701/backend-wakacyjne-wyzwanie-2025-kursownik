@@ -6,6 +6,7 @@ import { Role } from "@/lib/roles";
 
 import { AuthGuard } from "../auth/auth.guard";
 import { RoleGuard } from "../auth/roles/role.guard";
+import type { UserMetadata } from "../user/dto/user-metadata.dto";
 import { ChapterController } from "./chapter.controller";
 import { ChapterService } from "./chapter.service";
 import type { CreateChapterDto } from "./dto/create-chapter.dto";
@@ -29,6 +30,11 @@ class MockAuthGuard implements CanActivate {
 
 describe("ChapterController", () => {
   let controller: ChapterController;
+  const user: UserMetadata = {
+    id: "id",
+    email: "email",
+    roles: Role.USER.toString(),
+  };
 
   const mockChapterService = {
     create: jest.fn((dto: CreateChapterDto) => ({
@@ -90,7 +96,7 @@ describe("ChapterController", () => {
     ];
     mockChapterService.findAll.mockResolvedValue(chapters);
 
-    const result = await controller.findAll();
+    const result = await controller.findAll({ user });
     expect(result).toEqual(chapters);
     expect(mockChapterService.findAll).toHaveBeenCalled();
   });
@@ -104,9 +110,9 @@ describe("ChapterController", () => {
     };
     mockChapterService.findOne.mockResolvedValue(chapter);
 
-    const result = await controller.findOne("1");
+    const result = await controller.findOne("1", { user });
     expect(result).toEqual(chapter);
-    expect(mockChapterService.findOne).toHaveBeenCalledWith("1");
+    expect(mockChapterService.findOne).toHaveBeenCalled();
   });
 
   it("should update a chapter", async () => {

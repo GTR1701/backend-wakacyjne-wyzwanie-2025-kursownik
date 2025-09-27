@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -22,6 +23,7 @@ import { Role } from "@/lib/roles";
 import { AuthGuard } from "../auth/auth.guard";
 import { Roles } from "../auth/roles/role.decorator";
 import { RoleGuard } from "../auth/roles/role.guard";
+import { UserMetadata } from "../user/dto/user-metadata.dto";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonService } from "./lesson.service";
@@ -64,13 +66,32 @@ export class LessonController {
     description: "A list of lessons.",
     type: [CreateLessonDto],
   })
-  async findAll() {
-    return await this.lessonService.findAll();
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  async findAll(@Request() request: { user: UserMetadata }) {
+    return await this.lessonService.findAll(request.user.email);
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return await this.lessonService.findOne(id);
+  @ApiOperation({
+    summary: "Get lesson by id",
+    description: "Retrieve a lesson by its id",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The lesson with the specified id.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Lesson with given id not found",
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  async findOne(
+    @Param("id") id: string,
+    @Request() request: { user: UserMetadata },
+  ) {
+    return await this.lessonService.findOne(request.user.email, id);
   }
 
   @Patch(":id")

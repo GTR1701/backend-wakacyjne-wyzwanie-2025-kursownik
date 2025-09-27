@@ -27,10 +27,11 @@ model UserCourses {
   userId         String
   courseId       String
   activeLessonId String
+  isPremium      Boolean @default(false)
 
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course       Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  activeLesson Lesson @relation(fields: [activeLessonId], references: [id], onDelete: Cascade)
+  activeLesson Lesson @relation(fields: [activeLessonId], references: [id],onDelete: Cascade) 
 }
 
 model Course {
@@ -48,6 +49,7 @@ model Chapter {
   name        String
   description String
   courseId    String
+  chapterOrder Int @default(0)  
 
   course Course @relation(fields: [courseId], references: [id])
 
@@ -59,6 +61,7 @@ model Lesson {
   name        String
   description String
   chapterId   String
+  lessonOrder Int
 
   chapter Chapter @relation(fields: [chapterId], references: [id])
 

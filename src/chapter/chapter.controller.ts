@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -22,6 +23,7 @@ import { Role } from "@/lib/roles";
 import { AuthGuard } from "../auth/auth.guard";
 import { Roles } from "../auth/roles/role.decorator";
 import { RoleGuard } from "../auth/roles/role.guard";
+import { UserMetadata } from "../user/dto/user-metadata.dto";
 import { ChapterService } from "./chapter.service";
 import { CreateChapterDto } from "./dto/create-chapter.dto";
 import { UpdateChapterDto } from "./dto/update-chapter.dto";
@@ -60,8 +62,10 @@ export class ChapterController {
     description: "A list of chapters.",
     type: [CreateChapterDto],
   })
-  async findAll() {
-    return this.chapterService.findAll();
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  async findAll(@Request() request: { user: UserMetadata }) {
+    return this.chapterService.findAll(request.user.email);
   }
 
   @Get(":id")
@@ -79,8 +83,13 @@ export class ChapterController {
     status: 404,
     description: "Chapter not found.",
   })
-  async findOne(@Param("id") id: string) {
-    return this.chapterService.findOne(id);
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  async findOne(
+    @Param("id") id: string,
+    @Request() request: { user: UserMetadata },
+  ) {
+    return this.chapterService.findOne(request.user.email, id);
   }
 
   @Patch(":id")

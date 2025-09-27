@@ -9,5 +9,6 @@ import { ChapterService } from "./chapter.service";
   controllers: [ChapterController],
   providers: [ChapterService, PrismaService],
   imports: [AuthModule],
+  exports: [ChapterService],
 })
 export class ChapterModule {}
