@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -22,6 +23,7 @@ import { Role } from "@/lib/roles";
 import { AuthGuard } from "../auth/auth.guard";
 import { Roles } from "../auth/roles/role.decorator";
 import { RoleGuard } from "../auth/roles/role.guard";
+import { UserMetadata } from "../user/dto/user-metadata.dto";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonService } from "./lesson.service";
@@ -66,8 +68,8 @@ export class LessonController {
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  async findAll() {
-    return await this.lessonService.findAll();
+  async findAll(@Request() request: { user: UserMetadata }) {
+    return await this.lessonService.findAll(request.user.email);
   }
 
   @Get(":id")
@@ -85,8 +87,11 @@ export class LessonController {
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  async findOne(@Param("id") id: string) {
-    return await this.lessonService.findOne(id);
+  async findOne(
+    @Param("id") id: string,
+    @Request() request: { user: UserMetadata },
+  ) {
+    return await this.lessonService.findOne(request.user.email, id);
   }
 
   @Patch(":id")

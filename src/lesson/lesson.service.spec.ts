@@ -1,4 +1,4 @@
-import type { Lesson } from "@prisma/client";
+import type { Chapter, Lesson } from "@prisma/client";
 
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
@@ -11,6 +11,7 @@ import { LessonService } from "./lesson.service";
 
 describe("LessonService", () => {
   let service: LessonService;
+  const email = "email";
 
   const mockDatabaseService = {
     lesson: {
@@ -49,13 +50,24 @@ describe("LessonService", () => {
       name: "Test Lesson",
       description: "Description",
       chapterId: "chapter-1",
+      lessonOrder: 1,
     };
+
+    const mockChapter: Chapter = {
+      id: "chapter-1",
+      name: "Chapter 1",
+      description: "Desc",
+      chapterOrder: 1,
+      courseId: "course-1",
+    };
+    mockDatabaseService.chapter.findUnique.mockResolvedValue(mockChapter);
 
     const mockLesson: Lesson = {
       id: "lesson-1",
       name: dto.name,
       description: dto.description,
       chapterId: dto.chapterId,
+      lessonOrder: dto.lessonOrder ?? 0,
     };
     mockDatabaseService.lesson.create.mockResolvedValue(mockLesson);
 
@@ -67,6 +79,7 @@ describe("LessonService", () => {
         name: dto.name,
         description: dto.description,
         chapterId: dto.chapterId,
+        lessonOrder: dto.lessonOrder,
       },
     });
   });
@@ -78,7 +91,7 @@ describe("LessonService", () => {
     ];
     mockDatabaseService.lesson.findMany.mockResolvedValue(lessons);
 
-    const result = await service.findAll();
+    const result = await service.findAll(email);
 
     expect(result).toEqual(lessons);
     expect(mockDatabaseService.lesson.findMany).toHaveBeenCalled();
@@ -93,7 +106,7 @@ describe("LessonService", () => {
     };
     mockDatabaseService.lesson.findUnique.mockResolvedValue(lesson);
 
-    const result = await service.findOne("lesson-1");
+    const result = await service.findOne(email, "lesson-1");
 
     expect(result).toEqual(lesson);
     expect(mockDatabaseService.lesson.findUnique).toHaveBeenCalledWith({
@@ -104,7 +117,7 @@ describe("LessonService", () => {
   it("should throw NotFoundException when lesson not found in findOne", async () => {
     mockDatabaseService.lesson.findUnique.mockResolvedValue(null);
 
-    await expect(service.findOne("bad-id")).rejects.toThrow(
+    await expect(service.findOne(email, "bad-id")).rejects.toThrow(
       new NotFoundException("Lesson with id bad-id not found"),
     );
   });

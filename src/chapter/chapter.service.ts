@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateChapterDto } from "./dto/create-chapter.dto";
@@ -9,6 +13,14 @@ import { UpdateChapterDto } from "./dto/update-chapter.dto";
 export class ChapterService {
   constructor(private database: PrismaService) {}
   async create(createChapterDto: CreateChapterDto) {
+    const course = await this.database.course.findUnique({
+      where: { id: createChapterDto.courseId },
+    });
+    if (course == null) {
+      throw new NotFoundException(
+        `Course with id ${createChapterDto.courseId} not found`,
+      );
+    }
     return await this.database.chapter.create({
       data: {
         name: createChapterDto.name,
@@ -21,17 +33,26 @@ export class ChapterService {
     });
   }
 
-  async findAll() {
-    return await this.database.chapter.findMany();
+  async findAll(email: string) {
+    const chapters = await this.database.chapter.findMany();
+    return chapters.filter(
+      (chapter) =>
+        this.isPremium(email, chapter.courseId) || chapter.chapterOrder <= 2,
+    );
   }
 
-  async findOne(id: string): Promise<ResponseChapterDto> {
+  async findOne(email: string, id: string): Promise<ResponseChapterDto> {
     const chapter = await this.database.chapter.findUnique({
       where: { id },
     });
 
     if (chapter == null) {
       throw new NotFoundException(`Chapter with id ${id} not found`);
+    }
+    if (!this.isPremium(email, chapter.courseId) && chapter.chapterOrder > 2) {
+      throw new UnauthorizedException(
+        "You must be a premium user to access this chapter",
+      );
     }
 
     const lessons = await this.database.lesson.findMany({
@@ -102,5 +123,8 @@ export class ChapterService {
       },
     });
     return (result._max.chapterOrder ?? 0) + 1;
+  }
+  private isPremium(_email: string, _courseId: string): boolean {
+    return true;
   }
 }

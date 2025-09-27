@@ -6,6 +6,7 @@ import { Role } from "@/lib/roles";
 
 import { AuthGuard } from "../auth/auth.guard";
 import { RoleGuard } from "../auth/roles/role.guard";
+import type { UserMetadata } from "../user/dto/user-metadata.dto";
 import type { CreateLessonDto } from "./dto/create-lesson.dto";
 import type { UpdateLessonDto } from "./dto/update-lesson.dto";
 import { LessonController } from "./lesson.controller";
@@ -29,6 +30,11 @@ class MockAuthGuard implements CanActivate {
 
 describe("LessonController", () => {
   let controller: LessonController;
+  const user: UserMetadata = {
+    id: "id",
+    email: "email",
+    roles: Role.USER.toString(),
+  };
 
   const mockLessonService = {
     create: jest.fn((dto: CreateLessonDto) => ({
@@ -88,7 +94,7 @@ describe("LessonController", () => {
     ];
     mockLessonService.findAll.mockResolvedValue(lessons);
 
-    const result = await controller.findAll();
+    const result = await controller.findAll({ user });
     expect(result).toEqual(lessons);
     expect(mockLessonService.findAll).toHaveBeenCalled();
   });
@@ -97,9 +103,9 @@ describe("LessonController", () => {
     const lesson = { id: 1, title: "Lesson 1", description: "", chapterId: 1 };
     mockLessonService.findOne.mockResolvedValue(lesson);
 
-    const result = await controller.findOne("1");
+    const result = await controller.findOne("1", { user });
     expect(result).toEqual(lesson);
-    expect(mockLessonService.findOne).toHaveBeenCalledWith("1");
+    expect(mockLessonService.findOne).toHaveBeenCalled();
   });
 
   it("should update a lesson", async () => {

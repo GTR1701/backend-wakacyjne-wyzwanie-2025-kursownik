@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
@@ -8,6 +12,14 @@ import { UpdateLessonDto } from "./dto/update-lesson.dto";
 export class LessonService {
   constructor(private database: PrismaService) {}
   async create(createLessonDto: CreateLessonDto) {
+    if (
+      (await this.database.chapter.findUnique({
+        where: { id: createLessonDto.chapterId },
+      })) == null
+    ) {
+      throw new NotFoundException(`ChapterId is required`);
+    }
+
     return await this.database.lesson.create({
       data: {
         name: createLessonDto.name,
@@ -20,20 +32,38 @@ export class LessonService {
     });
   }
 
-  async findAll() {
-    return await this.database.lesson.findMany();
+  async findAll(email: string) {
+    const lessons = await this.database.lesson.findMany();
+
+    return lessons.filter(
+      (lesson) =>
+        this.isPremium(email, lesson.chapterId) || lesson.lessonOrder <= 2,
+    );
   }
 
-  async findOne(id: string) {
+  async findOne(email: string, id: string) {
     const lesson = await this.database.lesson.findUnique({
       where: { id },
     });
 
-    if (lesson === null) {
+    if (lesson == null) {
       throw new NotFoundException(`Lesson with id ${id} not found`);
-    } else {
-      return lesson;
     }
+    const chapter = await this.database.chapter.findUnique({
+      where: { id: lesson.chapterId },
+    });
+    if (chapter == null) {
+      throw new NotFoundException(
+        `Chapter with id ${lesson.chapterId} not found`,
+      );
+    }
+    if (!this.isPremium(email, lesson.chapterId) && chapter.chapterOrder > 2) {
+      throw new UnauthorizedException(
+        "You must be a premium user to access this lesson",
+      );
+    }
+
+    return lesson;
   }
 
   async update(id: string, updateLessonDto: UpdateLessonDto) {
@@ -92,5 +122,9 @@ export class LessonService {
       },
     });
     return (result._max.lessonOrder ?? 0) + 1;
+  }
+
+  private isPremium(_email: string, _chapterId: string): boolean {
+    return true;
   }
 }

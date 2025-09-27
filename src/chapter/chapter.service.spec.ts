@@ -1,3 +1,5 @@
+import type { Course } from "@prisma/client";
+
 import { NotFoundException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -10,6 +12,7 @@ import type { UpdateChapterDto } from "./dto/update-chapter.dto";
 describe("ChapterService", () => {
   let service: ChapterService;
 
+  const email = "email";
   const mockDatabaseService = {
     chapter: {
       create: jest.fn(),
@@ -49,10 +52,25 @@ describe("ChapterService", () => {
     const dto: CreateChapterDto = {
       name: "Chapter 1",
       description: "Desc",
+      chapterOrder: 1,
       courseId: "course-1",
     };
-    // eslint-disable-next-line @typescript-eslint/no-misused-spread
-    const mockChapter = { id: "ch-1", ...dto };
+
+    const course: Course = {
+      id: "course-1",
+      name: "Course 1",
+      description: "Course description",
+      imageSrc: "image.png",
+    };
+    mockDatabaseService.course.findUnique.mockResolvedValue(course);
+
+    const mockChapter = {
+      id: "ch-1",
+      name: dto.name,
+      description: dto.description,
+      chapterOtder: dto.chapterOrder,
+      courseId: dto.courseId,
+    };
 
     mockDatabaseService.chapter.create.mockResolvedValue(mockChapter);
 
@@ -63,6 +81,7 @@ describe("ChapterService", () => {
       data: {
         name: dto.name,
         description: dto.description,
+        chapterOrder: dto.chapterOrder,
         courseId: dto.courseId,
       },
     });
@@ -70,12 +89,24 @@ describe("ChapterService", () => {
 
   it("should return all chapters", async () => {
     const chapters = [
-      { id: "ch-1", name: "Chapter 1", description: "", courseId: "course-1" },
-      { id: "ch-2", name: "Chapter 2", description: "", courseId: "course-1" },
+      {
+        id: "ch-1",
+        name: "Chapter 1",
+        description: "",
+        chapterOrder: 1,
+        courseId: "course-1",
+      },
+      {
+        id: "ch-2",
+        name: "Chapter 2",
+        description: "",
+        chapterOrder: 2,
+        courseId: "course-1",
+      },
     ];
     mockDatabaseService.chapter.findMany.mockResolvedValue(chapters);
 
-    const result = await service.findAll();
+    const result = await service.findAll(email);
 
     expect(result).toEqual(chapters);
     expect(mockDatabaseService.chapter.findMany).toHaveBeenCalled();
@@ -96,7 +127,7 @@ describe("ChapterService", () => {
     mockDatabaseService.chapter.findUnique.mockResolvedValue(chapter);
     mockDatabaseService.lesson.findMany.mockResolvedValue(lessons);
 
-    const result = await service.findOne("ch-1");
+    const result = await service.findOne(email, "ch-1");
 
     expect(result).toEqual({
       ...chapter,
@@ -113,7 +144,7 @@ describe("ChapterService", () => {
   it("should throw NotFoundException when chapter not found in findOne", async () => {
     mockDatabaseService.chapter.findUnique.mockResolvedValue(null);
 
-    await expect(service.findOne("bad-id")).rejects.toThrow(
+    await expect(service.findOne(email, "bad-id")).rejects.toThrow(
       new NotFoundException("Chapter with id bad-id not found"),
     );
   });
