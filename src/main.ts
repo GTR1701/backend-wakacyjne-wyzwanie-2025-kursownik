@@ -51,8 +51,6 @@ async function bootstrap() {
     .setTitle("Kursownik API")
     .setDescription("API documentation for the Kursownik application")
     .setVersion("1.0")
-    .addTag("auth", "Authentication and user management")
-    .addTag("users", "User-related operations")
     .addBearerAuth(
       {
         type: "http",

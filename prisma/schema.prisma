@@ -67,3 +67,33 @@ model Lesson {
 
   UserCourses UserCourses[]
 }
+
+model ForexRate {
+  id        Int      @id @default(autoincrement())
+  currency  String
+  rate      Float
+  fetchedAt DateTime @default(now())
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Payment {
+  id               Int           @id @default(autoincrement())
+  title            String
+  description      String?
+  originalAmount   Float
+  originalCurrency String
+  plnAmount        Float
+  exchangeRate     Float?
+  status           PaymentStatus @default(PENDING)
+  processedAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("payments")
+}
