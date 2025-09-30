@@ -1,98 +1,217 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Kursownik Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive course management system built with NestJS, featuring user authentication, course enrollment, payment processing, and currency exchange functionality.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **User Management**: Registration, authentication, and role-based access control
+- **Course Management**: Create and manage courses with chapters and lessons
+- **User Progress Tracking**: Track user progress through courses and lessons
+- **Premium Content**: Support for premium course content with subscription model
+- **Payment Processing**: Handle payments with multi-currency support
+- **Forex Integration**: Real-time currency exchange rates
+- **API Documentation**: Comprehensive Swagger/OpenAPI documentation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Tech Stack
 
-## Project setup
+- **Framework**: NestJS
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Custom token-based authentication with bcrypt
+- **Validation**: Class-validator and class-transformer
+- **Documentation**: Swagger/OpenAPI
+- **Testing**: Jest for unit and e2e tests
+- **Code Quality**: ESLint, Prettier, Husky
+
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- PostgreSQL database
+- npm or yarn package manager
+
+## 🔧 Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd backend-wakacyjne-wyzwanie-2025-kursownik
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**
+   Create a `.env` file in the root directory:
+
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/kursownik?schema=public"
+   PORT=5000
+   EXPIRY_TIME_MS=3600000
+   ```
+
+4. **Database Setup**
+
+   ```bash
+   # Generate Prisma client
+   npx prisma generate
+
+   # Run database migrations
+   npx prisma migrate deploy
+
+   # Seed the database (optional)
+   npx prisma db seed
+   ```
+
+## 🚀 Running the Application
+
+### Development Mode
 
 ```bash
-$ npm install
+npm run start:dev
 ```
 
-## Compile and run the project
+### Production Mode
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run build
+npm run start:prod
 ```
 
-## Run tests
+### Debug Mode
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:debug
 ```
 
-## Deployment
+The API will be available at `http://localhost:5000`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 📚 API Documentation
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Once the application is running, you can access the Swagger documentation at:
+
+```
+http://localhost:5000/api
+```
+
+## 🧪 Testing
+
+### Unit Tests
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+npm run test
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### E2E Tests
 
-## Resources
+```bash
+npm run test:e2e
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Test Coverage
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run test:cov
+```
 
-## Support
+### Watch Mode
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run test:watch
+```
 
-## Stay in touch
+## 📊 Database Schema
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The application uses the following main entities:
 
-## License
+- **User**: User accounts with email authentication
+- **Course**: Course information and metadata
+- **Chapter**: Course chapters for organizing content
+- **Lesson**: Individual lessons within chapters
+- **UserCourses**: User enrollment and progress tracking
+- **Payment**: Payment processing and transaction records
+- **ForexRate**: Currency exchange rate data
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🔐 Authentication
+
+The API uses a custom token-based authentication system:
+
+- Tokens are formatted as `token_timestamp:email`
+- Include the token in the `Authorization` header as `Bearer <token>`
+- Tokens have configurable expiry time (default: 1 hour)
+
+## 🌐 CORS Configuration
+
+The application is configured to accept requests from:
+
+- `localhost` (any port)
+- `localhost:5000-5599` (development servers)
+
+## 📝 Code Quality
+
+### Linting
+
+```bash
+npm run lint
+```
+
+### Formatting
+
+```bash
+npm run format
+npm run format:check
+```
+
+### Type Checking
+
+```bash
+npm run typecheck
+```
+
+### Pre-flight Checks
+
+```bash
+npm run preflight
+```
+
+## 🗂️ Project Structure
+
+```
+src/
+├── auth/           # Authentication module
+├── chapter/        # Chapter management
+├── course/         # Course management
+├── forex/          # Currency exchange functionality
+├── lesson/         # Lesson management
+├── prisma/         # Database service
+├── user/           # User management
+├── app.module.ts   # Main application module
+└── main.ts         # Application entry point
+
+prisma/
+├── migrations/     # Database migrations
+├── schema.prisma   # Database schema
+└── seed.ts         # Database seeding
+
+test/
+├── e2e/           # End-to-end tests
+└── jest-e2e.json  # E2E test configuration
+```
+
+## 🔄 Available Scripts
+
+| Script                | Description                               |
+| --------------------- | ----------------------------------------- |
+| `npm run start`       | Start the application                     |
+| `npm run start:dev`   | Start in development mode with hot reload |
+| `npm run start:debug` | Start in debug mode                       |
+| `npm run build`       | Build the application                     |
+| `npm run test`        | Run unit tests                            |
+| `npm run test:e2e`    | Run end-to-end tests                      |
+| `npm run test:cov`    | Generate test coverage report             |
+| `npm run lint`        | Run ESLint                                |
+| `npm run format`      | Format code with Prettier                 |
+| `npm run typecheck`   | Run TypeScript type checking              |
+| `npm run preflight`   | Run all quality checks                    |
